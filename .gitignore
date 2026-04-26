@@ -1,0 +1,10 @@
+*.pyc
+__pycache__/
+venv/
+*.log
+.DS_Store
+local_settings.py
+.env
+.env.production
+tes.py
+echo "media/" >> .gitignore

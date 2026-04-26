@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% block title %}Developer documentation{% endblock %}
+
+{% block extra_head %}
+  <style>
+    /* Reset minimal */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0; padding: 0;
+      background: #f9fafb;
+      color: #222;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    main {
+      max-width: 900px;
+      width: 100%;
+      background: #fff;
+      padding: 2rem 3rem;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+      border-radius: 8px;
+    }
+
+    h1, h2, h3, h4 {
+      color: #0d6efd;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    ul {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    ul li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      background: #e9ecef;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: "Source Code Pro", monospace, monospace;
+      font-size: 0.95rem;
+      color: #d6336c;
+    }
+
+    /* Badges style for ✅ ❌ */
+    .step-icon {
+      font-weight: bold;
+      font-size: 1.3rem;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 600px) {
+      main {
+        padding: 1.5rem 1.5rem;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+    }
+
+    /* Tables for example */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+
+    th, td {
+      border: 1px solid #dee2e6;
+      padding: 0.5rem 1rem;
+      text-align: left;
+      vertical-align: middle;
+      font-size: 0.95rem;
+    }
+
+    th {
+      background-color: #e9ecef;
+      color: #495057;
+    }
+
+    /* FAQ styles */
+    .faq-item {
+      margin-bottom: 1rem;
+    }
+
+    .faq-question {
+      font-weight: 600;
+      color: #0d6efd;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 0.3rem;
+    }
+
+    .faq-answer {
+      margin-left: 1.5rem;
+      display: none;
+    }
+
+  </style>
+{% endblock %}
+{% block content %}
+
+  <div style="width: 100%; max-width: 900px; margin: 1rem auto 2rem; padding: 0 1rem;">
+    <a href="{% url 'users:user_logs' %}" 
+       style="
+         display: inline-block;
+         padding: 0.5rem 1rem;
+         background-color: #0d6efd;
+         color: white;
+         text-decoration: none;
+         border-radius: 4px;
+         font-weight: 600;
+         font-size: 1rem;
+         transition: background-color 0.3s ease;
+       "
+       onmouseover="this.style.backgroundColor='#0b5ed7'"
+       onmouseout="this.style.backgroundColor='#0d6efd'">
+      ← Back to the dashboard
+    </a>
+  </div>
+
+  <main>
+    <h1>Developer Documentation — Add Your API to the Platform</h1>
+    <p>Welcome to the <strong>Asstgr</strong> platform. This documentation explains how to integrate your APIs.</p>
+
+    <section>
+      <h2>📡 Public API — Endpoints Reference</h2>
+
+      <p>
+        Asstgr provides a full REST API to manage your APIs programmatically.
+        All endpoints require authentication via an <strong>API Key</strong>.
+      </p>
+
+      <div class="alert alert-info">
+        <strong>🔐 Authentication:</strong><br>
+        Include your API key in the request headers:
+        <pre><code>Authorization: Api-Key YOUR_API_KEY</code></pre>
+      </div>
+
+      <h3>🔑 API Keys</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>URL</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>GET</td><td><code>/api/v1/keys/</code></td><td>List your API keys</td></tr>
+          <tr><td>POST</td><td><code>/api/v1/keys/</code></td><td>Create a new API key</td></tr>
+          <tr><td>DELETE</td><td><code>/api/v1/keys/{id}/</code></td><td>Revoke an API key</td></tr>
+        </tbody>
+      </table>
+
+      <h3>📊 Quota & Limits</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>URL</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>GET</td><td><code>/api/v1/quota/</code></td><td>Get current usage and remaining quota</td></tr>
+          <tr><td>GET</td><td><code>/api/v1/limits/</code></td><td>Get platform limits</td></tr>
+        </tbody>
+      </table>
+
+      <h3>📚 APIs</h3>
+      <table>
+        <thead>
+          <tr><th>Method</th><th>URL</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>GET</td><td><code>/api/v1/apis/</code></td><td>List your APIs</td></tr>
+          <tr><td>POST</td><td><code>/api/v1/apis/</code></td><td>Create a new API</td></tr>
+          <tr><td>GET</td><td><code>/api/v1/apis/{api_id}/</code></td><td>Retrieve API details</td></tr>
+          <tr><td>PATCH</td><td><code>/api/v1/apis/{api_id}/</code></td><td>Update an API</td></tr>
+          <tr><td>DELETE</td><td><code>/api/v1/apis/{api_id}/</code></td><td>Delete an API</td></tr>
+        </tbody>
+      </table>
+
+      <h3>🔗 Endpoints</h3>
+      <table>
+        <thead>
+          <tr><th>Method</th><th>URL</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>GET</td><td><code>/api/v1/apis/{api_id}/endpoints/</code></td><td>List endpoints</td></tr>
+          <tr><td>POST</td><td><code>/api/v1/apis/{api_id}/endpoints/</code></td><td>Create endpoint</td></tr>
+          <tr><td>GET</td><td><code>/api/v1/apis/{api_id}/endpoints/{id}/</code></td><td>Get endpoint</td></tr>
+          <tr><td>PATCH</td><td><code>/api/v1/apis/{api_id}/endpoints/{id}/</code></td><td>Update endpoint</td></tr>
+          <tr><td>DELETE</td><td><code>/api/v1/apis/{api_id}/endpoints/{id}/</code></td><td>Delete endpoint</td></tr>
+        </tbody>
+      </table>
+
+      <h3>⚙️ Parameters</h3>
+      <table>
+        <thead>
+          <tr><th>Method</th><th>URL</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>GET</td><td><code>/api/v1/apis/{api_id}/endpoints/{endpoint_id}/parameters/</code></td><td>List parameters</td></tr>
+          <tr><td>POST</td><td><code>/api/v1/apis/{api_id}/endpoints/{endpoint_id}/parameters/</code></td><td>Create parameter</td></tr>
+        </tbody>
+      </table>
+
+      <h3>📨 Headers</h3>
+      <table>
+        <thead>
+          <tr><th>Method</th><th>URL</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>GET</td><td><code>/api/v1/apis/{api_id}/endpoints/{endpoint_id}/headers/</code></td><td>List headers</td></tr>
+          <tr><td>POST</td><td><code>/api/v1/apis/{api_id}/endpoints/{endpoint_id}/headers/</code></td><td>Create header</td></tr>
+        </tbody>
+      </table>
+
+      <h3>⚡ Methods</h3>
+      <table>
+        <thead>
+          <tr><th>Method</th><th>URL</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>GET</td><td><code>/api/v1/apis/{api_id}/endpoints/{endpoint_id}/methods/</code></td><td>List methods</td></tr>
+          <tr><td>POST</td><td><code>/api/v1/apis/{api_id}/endpoints/{endpoint_id}/methods/</code></td><td>Add method (GET, POST...)</td></tr>
+        </tbody>
+      </table>
+
+      <h3>🚀 Execute an Endpoint</h3>
+      <table>
+        <thead>
+          <tr><th>Method</th><th>URL</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>POST</td>
+            <td><code>/api/v1/apis/{api_id}/endpoints/{endpoint_id}/execute/</code></td>
+            <td>Execute the API call with parameters</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>🔐 OAuth 2.0</h3>
+      <table>
+        <thead>
+          <tr><th>Method</th><th>URL</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>GET / POST / PATCH / DELETE</td><td><code>/api/v1/apis/{api_id}/oauth/</code></td><td>Manage OAuth configuration</td></tr>
+          <tr><td>GET</td><td><code>/api/v1/apis/{api_id}/oauth/token/</code></td><td>Check token status</td></tr>
+          <tr><td>POST</td><td><code>/api/v1/apis/{api_id}/oauth/token/</code></td><td>Refresh token</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>⚙️ API Limits & Rate Limiting</h2>
+
+      <h3>📦 Resource Limits</h3>
+      <table>
+        <thead>
+          <tr><th>Resource</th><th>Limit</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>APIs per account</td><td><code>100</code></td></tr>
+          <tr><td>Endpoints per API</td><td><code>10</code></td></tr>
+          <tr><td>Parameters per endpoint</td><td><code>15</code></td></tr>
+          <tr><td>Headers per endpoint</td><td><code>10</code></td></tr>
+          <tr><td>API keys per account</td><td><code>5</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3>🚦 Rate Limiting (Throttling)</h3>
+
+      <p>Your API is protected by two levels of rate limiting:</p>
+
+      <ul>
+        <li><strong>Burst limit</strong> — prevents too many requests in a short time</li>
+        <li><strong>Sustained limit</strong> — controls long-term usage</li>
+      </ul>
+
+      <div class="alert alert-warning">
+        <strong>⚠️ Note:</strong><br>
+        Rate limits are applied per API key.<br>
+        If exceeded, requests will be temporarily blocked with a <code>429 Too Many Requests</code> response.
+      </div>
+
+      <h3>📊 Quota System</h3>
+      <p>
+        Each API call consumes quota credits based on your plan.
+        You can monitor your usage via:
+      </p>
+
+      <pre><code>GET /api/v1/quota/</code></pre>
+
+      <p>
+        The response includes:
+      </p>
+      <ul>
+        <li>Used calls</li>
+        <li>Remaining calls</li>
+        <li>Monthly limit</li>
+        <li>Usage percentage</li>
+      </ul>
+    </section>
+
+  </main>
+{% endblock %}
+{% block extra_scripts %}
+  <script>
+    // Simple FAQ toggle
+    document.querySelectorAll('.faq-question').forEach(q => {
+      q.addEventListener('click', () => {
+        const ans = q.nextElementSibling;
+        if(ans.style.display === 'block') {
+          ans.style.display = 'none';
+        } else {
+          ans.style.display = 'block';
+        }
+      });
+    });
+  </script>
+{% endblock %}
