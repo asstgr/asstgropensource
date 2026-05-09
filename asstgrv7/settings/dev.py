@@ -1,11 +1,7 @@
 from pathlib import Path
-from datetime import timedelta
 import os
 from dotenv import load_dotenv
 from django.urls import reverse_lazy
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
 load_dotenv()
 import os
 
@@ -16,9 +12,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-LOGIN_URL = reverse_lazy('users:register')
-
-# Sécurité
+LOGIN_URL = '/admin/login/'
+# SSecurity
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 DEBUG = True  
 
@@ -41,15 +36,12 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
 
     # Your apps
-    'core',
     'api_management',
     'users.apps.UsersConfig',
     'api_public',
 
 
-    # For S3
-    'storages',
-
+    
 ]
 
 
@@ -136,7 +128,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Langue / Temps
+# Language / Time
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
@@ -146,7 +138,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
-    BASE_DIR.parent / 'core' / 'static',
     BASE_DIR.parent / 'users' / 'static',
 ]
 

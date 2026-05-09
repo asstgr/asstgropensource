@@ -66,8 +66,13 @@ class APILogAdmin(admin.ModelAdmin):
     list_filter = ('api', 'endpoint', 'method', 'status_code')
     search_fields = ('user__username', 'api__name', 'endpoint__path')
 
-admin.site.register(APICallQuota)
-
+@admin.register(APICallQuota)
+class APICallQuotaAdmin(admin.ModelAdmin):
+    list_display = ('user', 'month', 'year', 'call_count', 'monthly_limit')
+    list_filter = ('month', 'year')
+    search_fields = ('user__username',)
+    list_editable = ('monthly_limit',)
+    
 @admin.register(OAuthConfig)
 class OAuthConfigAdmin(admin.ModelAdmin):
     list_display = ('api', 'grant_type', 'token_url')

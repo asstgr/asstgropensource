@@ -2,7 +2,7 @@
 
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponseBadRequest
 from django.urls import reverse
 from api_management.models import API
 from api_management.oauth_service import OAuthService

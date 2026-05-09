@@ -172,7 +172,7 @@ class APIListSerializer(serializers.ModelSerializer):
         model = API
         fields = [
             "id", "name", "description", "url",
-            "visibility", "is_active", "quota_cost",
+            "is_active", "quota_cost",
             "endpoint_count",
         ]
 
@@ -187,7 +187,7 @@ class APIDetailSerializer(serializers.ModelSerializer):
         model = API
         fields = [
             "id", "name", "description", "url",
-            "auth_required", "visibility", "is_active",
+            "auth_required", "is_active",
             "quota_cost", "endpoints",
         ]
 
@@ -197,7 +197,7 @@ class APICreateSerializer(serializers.ModelSerializer):
         model = API
         fields = [
             "name", "description", "url",
-            "auth_required", "visibility",
+            "auth_required", 
             "is_active", "quota_cost",
         ]
 
@@ -276,7 +276,7 @@ class APIDetailSerializer(serializers.ModelSerializer):
         model = API
         fields = [
             'id', 'name', 'description', 'url',
-            'auth_required', 'visibility', 'is_active',
+            'auth_required', 'is_active',
             'quota_cost', 'endpoints',
             'oauth_config',  # ← ajoute ça
         ]

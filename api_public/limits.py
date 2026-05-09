@@ -1,19 +1,19 @@
 """
-Limites fixes pour la création de ressources via l'API publique.
-Modifie ces constantes pour ajuster les quotas globaux.
+Fixed limits for creating assets via the public API.
+Modifies these constants to adjust global quotas.
 """
 
-# ── Limites globales ──────────────────────────────────────────
+# ── Global limits ──────────────────────────────────────────────
 LIMITS = {
-    "apis":           100,    # APIs max par utilisateur
-    "endpoints":      10,   # Endpoints max par API
-    "parameters":     15,   # Paramètres max par endpoint
-    "headers":        10,   # Headers max par endpoint
-    "api_keys":       5,    # Clés API publiques max par utilisateur
+    "apis":           100,    # APIs max per user
+    "endpoints": 10, #max endpoints per API
+    "parameters":  15,  # Max parameters per endpoint
+    "headers":  10,  # Headers max per endpoint
+    "api_keys":  5, #max public API keys per user
 }
 
 
-# ── Messages d'erreur associés ────────────────────────────────
+# ── error messages associated ────────────────────────────────
 LIMIT_MESSAGES = {
     "apis":       f"Maximum {LIMITS['apis']} APIs allowed per account.",
     "endpoints":  f"Maximum {LIMITS['endpoints']} endpoints allowed per API.",
@@ -25,11 +25,11 @@ LIMIT_MESSAGES = {
 
 def check_limit(resource: str, current_count: int) -> tuple[bool, str | None]:
     """
-    Vérifie si une limite est atteinte.
+    Checks if a limit has been reached.
 
     Returns:
-        (True, None)          → sous la limite, création autorisée
-        (False, error_msg)    → limite atteinte, création refusée
+        (True, None)          → under the limit, creation allowed
+        (False, error_msg)    → limit reached, creation denied
     """
     limit = LIMITS.get(resource)
     if limit is None:
@@ -42,7 +42,7 @@ def check_limit(resource: str, current_count: int) -> tuple[bool, str | None]:
 
 
 def get_limits_summary() -> dict:
-    """Retourne un résumé lisible des limites pour l'exposer via l'API."""
+    """Returns a readable summary of the limits for exposure via the API."""
     return {
         "max_apis_per_account":        LIMITS["apis"],
         "max_endpoints_per_api":       LIMITS["endpoints"],

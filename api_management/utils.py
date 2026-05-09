@@ -1,38 +1,18 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render
 import json
 import requests
 from api_management.models import *
-import os
-import json
 import xml.etree.ElementTree as ET
-import openai
-from dotenv import load_dotenv
-from deep_translator import GoogleTranslator
 from collections import OrderedDict
-from urllib.parse import urlencode
 from string import Formatter
-from django.http import JsonResponse
-from django.utils.timezone import now
-from django.utils import timezone
-import os
-import json
-import openai
-import tiktoken  # À installer avec : pip install tiktoken
 from urllib.parse import urlencode, quote_plus
-import json
-from typing import Any, Dict, List, Union , Optional
 import re
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from enum import Enum
-import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-
-# Clé API OpenAI (via variable d'environnement)
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEYS")
-MAX_TOTAL_TOKENS = 1000
 
 
 
@@ -101,7 +81,7 @@ def build_url(api_url, endpoint_path, parameters, user_params):
 # Function to send the API request
 
 
-# Session globale (réutilise les connexions)
+# Global Session (reuses connections)
 session = requests.Session()
 
 retry_strategy = Retry(
@@ -232,27 +212,27 @@ def process_method(request, methods):
 # Function to validate and process user parameters
 def validate_and_process_parameters(request, parameters):
     """
-    Valide et traite les paramètres de la requête.
-    Sépare correctement les paramètres query, body et header.
+    Validates and processes the query parameters.
+    Properly separates the query, body, and header parameters.
     """
     user_params = {}
     request_data_clean = []
     header_params = {}
     body_params = {}
-    query_params = {}  # Nouveau: paramètres de requête séparés
+    query_params = {}  # New: separated query parameters
     error_message = None
 
     for param in parameters:
         param_value = param.stored_value or request.POST.get(param.name, param.default_value)
         
-        # Ne traiter que si la valeur existe
+        # Only process if value exists
         if param_value is not None and param_value != '':
             user_params[param.name] = param_value
             
             if request.POST.get(param.name):
                 request_data_clean.append(param_value)
             
-            # Classifier les paramètres selon leur type
+            # Classify the parameters according to their type
             if param.is_in_body:
                 body_params[param.name] = param_value
             elif param.param_type == 'query':
@@ -260,13 +240,13 @@ def validate_and_process_parameters(request, parameters):
             elif param.param_type == 'header':
                 header_params[param.name] = param_value
             elif param.param_type == 'path':
-                # Les paramètres path restent dans user_params pour fill_url_path
+                # The path parameters remain in user_params for fill_url_path
                 pass
 
-    # Construire le payload body avec la fonction existante
+    # Build the body payload with the existing function
     body_params = build_body_payload(parameters, user_params)
     
-    # Valider les paramètres
+    # validate the settings
     validation_error = validate_parameters(parameters, user_params)
     if validation_error:
         error_message = validation_error
@@ -313,93 +293,13 @@ def call_api(url, selected_method, request_headers, body_params, user_params):
 
 
 
-def count_tokens(text, model="gpt-5-nano"):
-    """Counts the number of tokens in a given text for a specific model."""
-    encoding = tiktoken.get_encoding("cl100k_base")
-    return len(encoding.encode(text))
-
-def truncate_json_to_fit(json_data, max_tokens, model="gpt-4.1-nano", depth=0, max_depth=20):
-    if depth > max_depth:
-        raise RecursionError("Recursion limit reached while truncating JSON.")
-
-    def token_len(obj):
-        return count_tokens(json.dumps(obj, indent=2, ensure_ascii=False), model)
-
-    if token_len(json_data) <= max_tokens:
-        return json.dumps(json_data, indent=2, ensure_ascii=False)
-
-    # Handle list
-    if isinstance(json_data, list):
-        if not json_data:
-            return "[]"
-        new_length = max(1, len(json_data) * max_tokens // token_len(json_data))
-        truncated = json_data[:new_length]
-        return truncate_json_to_fit(truncated, max_tokens, model, depth + 1, max_depth)
-
-    # Handle dict
-    if isinstance(json_data, dict):
-        truncated = {}
-        for key, value in json_data.items():
-            truncated[key] = value
-            if token_len(truncated) > max_tokens:
-                del truncated[key]
-                break
-        if not truncated:
-            return "{}"
-        return truncate_json_to_fit(truncated, max_tokens, model, depth + 1, max_depth)
-
-    # Handle string
-    if isinstance(json_data, str):
-        while count_tokens(json_data, model) > max_tokens and len(json_data) > 0:
-            json_data = json_data[:-1]
-        return json_data
-
-    # Fallback
-    return json.dumps({}, indent=2, ensure_ascii=False)
-
-
-
-def json_to_natural_language(json_data):
-    """Transforms JSON into a human-readable explanation, respecting token limits."""
-    model = "gpt-4.1-nano"
-    system_msg = "You are an assistant who explains JSON responses in natural language."
-    system_tokens = count_tokens(system_msg, model)
-
-    try:
-        json_text = truncate_json_to_fit(json_data, MAX_TOTAL_TOKENS - system_tokens - 50, model)
-    except RecursionError:
-        return "[Erreur] The JSON is too large or complex to be summarized within the token limit."
-    except Exception as e:
-        return f"[Error during the preparation of JSON for AI: {str(e)}]"
-
-    prompt = f"Turn this JSON response into an understandable sentence:\n\n{json_text}"
-
-    if count_tokens(prompt, model) + system_tokens > MAX_TOTAL_TOKENS:
-        return "[Error] The request always exceeds the token limit even after truncation."
-
-    try:
-        client = openai.OpenAI(api_key=OPENAI_API_KEY)
-
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7
-        )
-
-        return response.choices[0].message.content
-    except Exception as e:
-        return f"[Error calling OpenAI: {str(e)}]"
-
 def process_api_response(response, display_format, language):
     content_type = response.headers.get('Content-Type', '')
 
     MAX_RAW_RESPONSE_BYTES = 100_000
     MAX_VERBOSE_CHARS = 20_000
 
-    # 🔒 Sécurité : taille brute
+    # 🔒 Security: Raw Size
     if len(response.content) > MAX_RAW_RESPONSE_BYTES:
         return (
             f"[Error] The API response exceeds the maximum allowed size "
@@ -424,7 +324,7 @@ def process_api_response(response, display_format, language):
             cleaner = JSONCleaner(display_mode=mode_map[display_format])
             rendered = cleaner.json_to_flat_text(json_response)
 
-            # 🔥 Limite spécifique au mode verbose
+            # 🔥 Specific limit for verbose mode
             if display_format == "verbose" and len(rendered) > MAX_VERBOSE_CHARS:
                 return (
                     "[Error] The response is too large to be displayed in verbose mode. "
@@ -436,9 +336,7 @@ def process_api_response(response, display_format, language):
         elif display_format == "json":
             return json.dumps(json_response, indent=4, ensure_ascii=False)
 
-        elif display_format == "natural":
-            return json_to_natural_language(json_response, language)
-
+       
         return json.dumps(json_response, indent=4, ensure_ascii=False)
 
     # XML
@@ -497,10 +395,10 @@ def render_error(request, api, endpoint, methods, parameters, headers, error_mes
 
 
 class DisplayMode(Enum):
-    """Modes d'affichage disponibles"""
-    COMPACT = "compact"      # Version technique, concise
-    STANDARD = "standard"    # Lisible avec formatage intelligent
-    VERBOSE = "verbose"      # Très détaillé avec phrases complètes
+    """Available display modes"""
+    COMPACT = "compact"      # Technical, concise version
+    STANDARD = "standard"    # Readable with smart formatting
+    VERBOSE = "verbose"      # Very detailed with complete sentences
 
 class JSONCleaner:
     def __init__(self, 
@@ -513,17 +411,17 @@ class JSONCleaner:
                  use_emojis=True,
                  humanize_keys=True):
         """
-        Initialiseur du nettoyeur JSON amélioré
+        Enhanced JSON Cleaner Initializer
         
         Args:
-            remove_private_keys: Supprime les clés commençant par '_'
-            remove_empty_values: Supprime les valeurs vides (None, "", [], {})
-            max_string_length: Longueur max des chaînes avant troncature
-            max_array_items: Nombre max d'éléments dans un array à afficher
-            indent_size: Taille de l'indentation
-            display_mode: Mode d'affichage (COMPACT, STANDARD, VERBOSE)
-            use_emojis: Utiliser des emojis pour améliorer la lisibilité
-            humanize_keys: Transformer les clés techniques en texte lisible
+            remove_private_keys: Removes keys starting with '_'
+            remove_empty_values: Removes blank values (None, "", [], {})
+            max_string_length: Max length of strings before truncation
+            max_array_items: Max number of items in an array to display
+            indent_size
+            display_mode: Display mode (COMPACT, STANDARD, VERBOSE)
+            use_emojis: Use emojis to improve readability
+            humanize_keys: Transform technical keys into readable text
         """
         self.remove_private_keys = remove_private_keys
         self.remove_empty_values = remove_empty_values
@@ -535,7 +433,7 @@ class JSONCleaner:
         self.humanize_keys = humanize_keys
     
     def _is_empty_value(self, value: Any) -> bool:
-        """Détermine si une valeur est considérée comme vide"""
+        """Determines whether a value is considered blank"""
         if value is None:
             return True
         if isinstance(value, (str, list, dict)) and len(value) == 0:
@@ -545,26 +443,26 @@ class JSONCleaner:
         return False
     
     def _should_skip_key(self, key: str) -> bool:
-        """Détermine si une clé doit être ignorée"""
+        """Determines whether a key should be skipped"""
         if self.remove_private_keys and key.startswith('_'):
             return True
         return False
     
     def _humanize_key(self, key: str) -> str:
-        """Transforme snake_case ou camelCase en texte lisible"""
+        """Transforms snake_case or camelCase into readable text"""
         if not self.humanize_keys:
             return key
         
-        # Gère camelCase en insérant des espaces avant les majuscules
+        # Handles camelCase by inserting spaces before capital letters
         key = re.sub('([a-z])([A-Z])', r'\1 \2', key)
         
-        # Remplace underscores et tirets par des espaces
+        # Replace underscores and hyphens with spaces
         key = key.replace('_', ' ').replace('-', ' ')
         
-        # Capitalise chaque mot
+        # Capitalize each word
         words = key.split()
         
-        # Gère les acronymes courants
+        # Handle common acronyms
         acronyms = ['ID', 'API', 'URL', 'HTTP', 'JSON', 'XML', 'UUID', 'IP']
         capitalized = []
         for word in words:
@@ -576,17 +474,17 @@ class JSONCleaner:
         return ' '.join(capitalized)
     
     def _detect_and_format_date(self, value: str) -> Optional[str]:
-        """Détecte et formate les dates ISO"""
-        # Pattern pour dates ISO (2024-01-15T10:30:00Z ou 2024-01-15)
+        """Detects and formats ISO dates"""
+        # Pattern for ISO dates (2024-01-15T10:30:00Z or 2024-01-15)
         iso_pattern = r'^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?)?$'
         
         if re.match(iso_pattern, value):
             try:
-                # Remplace 'Z' par '+00:00' pour la compatibilité
+                # Replace 'Z' with '+00:00' for compatibility
                 date_str = value.replace('Z', '+00:00')
                 dt = datetime.fromisoformat(date_str)
                 
-                # Format selon la précision
+                # Format according to precision
                 if 'T' in value:
                     emoji = '📅' if self.use_emojis else ''
                     return f"{emoji} {dt.strftime('%d/%m/%Y à %H:%M')}".strip()
@@ -664,31 +562,31 @@ class JSONCleaner:
                 emoji = '📧' if self.use_emojis else ''
                 return f"{emoji} {value}".strip()
             
-            # Status/State (détection dans la clé)
+            # Status/State (detection in the key)
             if any(word in key_lower for word in ['status', 'state', 'type', 'mode']):
                 emoji = self._get_status_emoji(value)
                 return f"{emoji} {value}".strip()
             
-            # String normale
+            # String normal
             cleaned = re.sub(r'\s+', ' ', value.strip())
             return f'"{self._truncate_string(cleaned)}"'
         
-        # Nombres
+        # Numbers
         if isinstance(value, int):
-            # Détection de contexte pour les nombres
+            # Detection of context for numbers
             if any(word in key_lower for word in ['count', 'total', 'number', 'quantity', 'amount']):
                 if self.display_mode == DisplayMode.VERBOSE:
                     return f"{value:,}".replace(',', ' ') + " item(s)"
                 return f"{value:,}".replace(',', ' ')
             
-            # Grands nombres avec séparateurs
+            # Large numbers with separators
             if value > 1000:
                 return f"{value:,}".replace(',', ' ')
             
             return str(value)
         
         if isinstance(value, float):
-            # Prix/montants
+            # Price/Amounts
             if any(word in key_lower for word in ['price', 'amount', 'cost', 'total']):
                 emoji = '💰' if self.use_emojis else ''
                 return f"{emoji} {value:.2f}".strip()
@@ -697,14 +595,14 @@ class JSONCleaner:
         return str(value)
     
     def _truncate_string(self, text: str) -> str:
-        """Tronque une chaîne si elle est trop longue"""
+        """Truncates a string if it is too long"""
         if len(text) <= self.max_string_length:
             return text
         return f"{text[:self.max_string_length]}... ({len(text)} characters)"
     
     def _create_summary(self, data: Dict) -> str:
-        """Crée un résumé d'une ligne pour les objets complexes"""
-        # Cherche des champs clés courants pour identifier l'objet
+        """Creates a summary of a line for complex objects"""
+        # Search for common key fields to identify the object
         summary_fields = ['name', 'title', 'label', 'id', 'email', 'username', 'key']
         
         for field in summary_fields:
@@ -712,11 +610,11 @@ class JSONCleaner:
                 value = data[field]
                 return f"({field}: {value})"
         
-        # Sinon, compte les propriétés
+        # Otherwise, count the properties
         return f"({len(data)} property(s))"
     
     def process_json(self, data: Any) -> Any:
-        """Nettoie et simplifie un JSON de manière récursive"""
+        """Clean and simplify a JSON recursively"""
         if isinstance(data, dict):
             cleaned = {}
             for k, v in data.items():
@@ -742,7 +640,7 @@ class JSONCleaner:
         return data
     
     def flatten_dict(self, d: Dict, level: int = 0) -> List[str]:
-        """Aplatit un dictionnaire avec formatage selon le mode d'affichage"""
+        """Flattens a dictionary with formatting according to the display mode"""
         lines = []
         indent = ' ' * (self.indent_size * level)
         bullet = '•' if self.display_mode != DisplayMode.COMPACT and level == 0 else ''
@@ -794,7 +692,7 @@ class JSONCleaner:
         return lines
     
     def json_to_flat_text(self, data: Any) -> str:
-        """Transforme des données JSON en texte plat lisible"""
+        """Transforms JSON data into readable flat text"""
         if data is None:
             return "null"
         
@@ -806,7 +704,7 @@ class JSONCleaner:
             
             lines = []
             
-            # Header pour mode standard/verbose
+            # Header for standard/verbose mode
             if self.display_mode != DisplayMode.COMPACT:
                 obj_type = cleaned_data.get('type', cleaned_data.get('object', 'Objet'))
                 emoji = '📋' if self.use_emojis else ''
@@ -844,7 +742,7 @@ class JSONCleaner:
             return self._smart_format_value('value', cleaned_data)
     
     def analyze_structure(self, data: Any) -> str:
-        """Fournit une analyse de la structure du JSON"""
+        """Provides an analysis of the JSON structure"""
         def count_elements(obj, counts=None):
             if counts is None:
                 counts = {
@@ -901,14 +799,15 @@ class JSONCleaner:
         return '\n'.join(analysis)
 
 
-# Fonctions de commodité avec différents modes
+#Convenience functions with different modes
+
 def process_json(data):
-    """Version simplifiée pour compatibilité"""
+    """Simplified version for compatibility"""
     cleaner = JSONCleaner()
     return cleaner.process_json(data)
 
 def json_to_flat_text(data, mode='standard'):
-    """Version simplifiée avec choix de mode"""
+    """Simplified version with mode selection"""
     mode_map = {
         'compact': DisplayMode.COMPACT,
         'standard': DisplayMode.STANDARD,
@@ -918,7 +817,7 @@ def json_to_flat_text(data, mode='standard'):
     return cleaner.json_to_flat_text(data)
 
 def json_to_compact(data):
-    """Format compact et technique"""
+    """Compact and technical format"""
     cleaner = JSONCleaner(
         display_mode=DisplayMode.COMPACT,
         use_emojis=False,
@@ -927,99 +826,14 @@ def json_to_compact(data):
     return cleaner.json_to_flat_text(data)
 
 def json_to_standard(data):
-    """Format standard avec formatage intelligent"""
+    """Standard format with smart formatting"""
     cleaner = JSONCleaner(display_mode=DisplayMode.STANDARD)
     return cleaner.json_to_flat_text(data)
 
 def json_to_verbose(data):
-    """Format très détaillé"""
+    """Verbose format with detailed information"""
     cleaner = JSONCleaner(
         display_mode=DisplayMode.VERBOSE,
         max_array_items=20
     )
     return cleaner.json_to_flat_text(data)
-
-"""
-# Exemple d'utilisation
-if __name__ == "__main__":
-    # Exemple de JSON d'API
-    sample_data = {
-        "user_id": 12345,
-        "first_name": "John",
-        "last_name": "Doe",
-        "email": "john.doe@example.com",
-        "is_active": True,
-        "is_verified": False,
-        "created_at": "2024-01-15T10:30:00Z",
-        "last_login": "2024-11-11T08:15:30Z",
-        "profile_url": "https://example.com/users/12345",
-        "total_orders": 42,
-        "account_balance": 1250.50,
-        "status": "active",
-        "preferences": {
-            "newsletter": True,
-            "notifications": {
-                "email": True,
-                "sms": False,
-                "push": True
-            }
-        },
-        "recent_orders": [
-            {"order_id": 1001, "amount": 99.99, "status": "completed"},
-            {"order_id": 1002, "amount": 149.50, "status": "pending"},
-            {"order_id": 1003, "amount": 75.00, "status": "shipped"}
-        ]
-    }
-    
-    print("=== MODE COMPACT ===")
-    print(json_to_compact(sample_data))
-    print("\n" + "="*50 + "\n")
-    
-    print("=== MODE STANDARD ===")
-    print(json_to_standard(sample_data))
-    print("\n" + "="*50 + "\n")
-    
-    print("=== MODE VERBOSE ===")
-    print(json_to_verbose(sample_data))
-    print("\n" + "="*50 + "\n")
-    
-    print("=== ANALYSE ===")
-    cleaner = JSONCleaner()
-    print(cleaner.analyze_structure(sample_data))
-
-# Exemple d'utilisation
-if __name__ == "__main__":
-    # Données de test
-    sample_data = {
-        "_private": "ne devrait pas apparaître",
-        "name": "   Nom avec espaces multiples   ",
-        "description": "Une très longue description qui va être tronquée car elle dépasse la limite de caractères définie dans la configuration du nettoyeur JSON",
-        "items": [
-            {"id": 1, "value": "item1", "_internal": "privé"},
-            {"id": 2, "value": "item2", "empty": ""},
-            {"id": 3, "value": "item3", "data": None}
-        ],
-        "empty_dict": {},
-        "empty_array": [],
-        "metadata": {
-            "version": 1.2,
-            "active": True,
-            "config": {
-                "debug": False,
-                "timeout": 30
-            }
-        }
-    }
-    
-    # Test avec configuration personnalisée
-    cleaner = JSONCleaner(max_string_length=50, max_array_items=5)
-    
-    print("=== DONNÉES ORIGINALES ===")
-    print(json.dumps(sample_data, indent=2, ensure_ascii=False))
-    
-    print("\n=== ANALYSE DE STRUCTURE ===")
-    print(cleaner.analyze_structure(sample_data))
-    
-    print("\n=== VERSION NETTOYÉE ===")
-    print(cleaner.json_to_flat_text(sample_data))
-"""

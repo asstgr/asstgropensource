@@ -1,28 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import URLValidator
-import os
-from django.utils.crypto import get_random_string
 from datetime import timedelta
 from django.utils import timezone
-from datetime import date
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.core.validators import MinValueValidator
 from django.db import models
-from django.core.files.storage import default_storage
-from django.utils.deconstruct import deconstructible
-from django.core.files.base import ContentFile
-from cloudinary.models import CloudinaryField
 import logging
 from django.contrib.auth import get_user_model
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
-def api_image_upload_path(instance, filename):
-    if instance.pk and instance.created_by:
-        return f'api_images/user_{instance.created_by.id}/api_{instance.pk}/{filename}'
-    return f'api_images/temp/{filename}'
 
 class API(models.Model):
     name = models.CharField(max_length=255)
@@ -32,23 +19,16 @@ class API(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_apis', null=True, blank=True)
     api_key_encrypted = models.CharField(blank=True, null=True)
     is_blocked = models.BooleanField(default=False)
-    image = CloudinaryField('API image', folder='api_images', blank=True, null=True)
-    
-    VISIBILITY_CHOICES = [
-        ('public', 'Publique'),
-        ('private', 'Privée'),
-    ]
-    visibility = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default='private')
     is_active = models.BooleanField(default=True)
     
-    # 🆕 NOUVEAU CHAMP : Coût en quota par appel
+    # 🆕 NEW FIELD: Quota cost per call
     quota_cost = models.PositiveIntegerField(
         default=1,
-        help_text="Nombre de crédits consommés par appel à cette API"
+        help_text="Number of credits consumed per call to this API"
     )
 
     def can_be_accessed_by(self, user):
-        """Seul le créateur ou un admin peut accéder à une API."""
+        """Only creator or admin can access an API."""
         if not user or not user.is_authenticated:
             return False
         if user.is_superuser:
@@ -92,11 +72,11 @@ class OAuthConfig(models.Model):
         null=True,
         help_text="Scopes séparés par des espaces (ex: read write)"
     )
-    # Pour Authorization Code uniquement
+    # For Authorization Code only
     redirect_uri = models.URLField(blank=True, null=True)
     authorization_url = models.URLField(blank=True, null=True)
 
-    # Cache du token
+    # Token cache
     access_token = models.TextField(blank=True, null=True)
     token_expires_at = models.DateTimeField(blank=True, null=True)
     refresh_token = models.TextField(blank=True, null=True)
@@ -105,6 +85,7 @@ class OAuthConfig(models.Model):
         if not self.access_token:
             return False
         # token_expires_at NULL = token permanent (ex: GitHub)
+
         if not self.token_expires_at:
             return True
         try:
@@ -230,7 +211,7 @@ class APICallQuota(models.Model):
     month = models.PositiveIntegerField(default=1)
     year = models.PositiveIntegerField(default=timezone.now().year)
 
-    # ✅ IMPORTANT : null=True pour illimité
+    # ✅ IMPORTANT: null=True for unlimited
     monthly_limit = models.PositiveIntegerField(null=True, blank=True, default=100)
 
     class Meta:
@@ -259,7 +240,7 @@ class APICallQuota(models.Model):
             defaults={
                 "date": today.date(),
                 "call_count": 0,
-                "monthly_limit": 100,  # limite fixe
+                "monthly_limit": 100,  # fixed limit
             }
         )
 
@@ -288,15 +269,3 @@ class APICallQuota(models.Model):
             return 0
         return min(100, (self.call_count / self.monthly_limit) * 100)
     
-
-class DailyUserUsage(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField()
-    count = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        unique_together = ("user", "date")
-
-    def __str__(self):
-        return f"{self.user.username} - {self.date} ({self.count})"
- 

@@ -34,7 +34,7 @@ class OAuthService:
 
     @staticmethod
     def fetch_token_authorization_code(oauth_config, code):
-        """Échange un code d'autorisation contre un token."""
+        """Exchange an authorization code for a token."""
         response = requests.post(
             oauth_config.token_url,
             data={
@@ -51,7 +51,7 @@ class OAuthService:
             timeout=10
         )
 
-        # Log la réponse brute pour debug
+        # Log the raw response for debug
         try:
             raw = response.json()
             logger.debug(f"Token response: {raw}")
@@ -64,8 +64,8 @@ class OAuthService:
     @staticmethod
     def refresh_access_token(oauth_config):
         """
-        Rafraîchit le token via refresh_token.
-        Compatible GitHub et Google.
+        Refreshes the token via refresh_token.
+        GitHub and Google compatible.
         """
         if not oauth_config.refresh_token:
             raise ValueError("No refresh token available.")
@@ -87,8 +87,8 @@ class OAuthService:
         response.raise_for_status()
         data = response.json()
 
-        # Google ne renvoie pas toujours un nouveau refresh_token
-        # → on conserve l'ancien si absent dans la réponse
+        # Google does not always return a new refresh_token
+        # → we keep the old one if it’s missing in the answer
         if "refresh_token" not in data and oauth_config.refresh_token:
             data["refresh_token"] = oauth_config.refresh_token
 
@@ -101,9 +101,9 @@ class OAuthService:
     @classmethod
     def save_token(cls, oauth_config, token_data):
         """
-        Sauvegarde le token en base.
-        - Google  : expires_in=3600 + refresh_token
-        - GitHub  : pas d'expires_in → token permanent
+        Save the token to the database.
+        - Google: expires_in = 3600 + refresh_token
+        - GitHub: pas d'expires_in → token permanently
         """
         access_token = token_data.get("access_token")
         if not access_token:
@@ -116,15 +116,15 @@ class OAuthService:
         oauth_config.access_token = access_token
 
         if expires_in:
-            # Token avec expiration (Google : 3600s)
+            # Token with expiration (Google : 3600s)
             oauth_config.token_expires_at = (
                 timezone.now() + timedelta(seconds=int(expires_in))
             )
         else:
-            # Token permanent (GitHub) → NULL = valide indéfiniment
+            # Permanent token (GitHub) → NULL = valid indefinitely
             oauth_config.token_expires_at = None
 
-        # Refresh token : ne l'écrase que s'il est présent
+        # Refresh token: only overwrites it if it is present
         if token_data.get("refresh_token"):
             oauth_config.refresh_token = token_data["refresh_token"]
 
@@ -145,25 +145,25 @@ class OAuthService:
     @classmethod
     def get_valid_token(cls, oauth_config):
         """
-        Retourne un token valide.
-        Ordre : cache → refresh → client_credentials → erreur
+        Returns a valid token.
+        Order: cache → refresh → client_credentials → error
         """
-        # Recharge depuis la DB pour éviter le cache Django
+        # Recharge from the DB to avoid the Django cache
         oauth_config.refresh_from_db()
 
-        # 1. Pas de token du tout
+        # 1. No token at all
         if not oauth_config.access_token:
             raise ValueError(
                 f"No token found. Please connect via OAuth: "
                 f"/api/oauth/authorize/{oauth_config.api.id}/"
             )
 
-        # 2. Token encore valide → retour immédiat
+        # 2. Token still valid → immediate return
         if oauth_config.is_token_valid():
             logger.debug(f"✅ Token valid for '{oauth_config.api.name}'")
             return oauth_config.access_token
 
-        # 3. Token expiré → tentative de refresh automatique
+        # 3. Token expired → automatic refresh attempt
         if oauth_config.refresh_token:
             try:
                 logger.info(
@@ -179,7 +179,7 @@ class OAuthService:
                     f"⚠️ Refresh failed for '{oauth_config.api.name}': {e}"
                 )
 
-        # 4. Client Credentials → nouveau token automatique
+        # 4. Client Credentials → new automated token
         if oauth_config.grant_type == "client_credentials":
             logger.info(
                 f"🔑 Fetching new token via client_credentials "
@@ -189,7 +189,7 @@ class OAuthService:
             cls.save_token(oauth_config, token_data)
             return oauth_config.access_token
 
-        # 5. Authorization Code sans refresh valide → reconnexion manuelle
+        # 5. Authorization Code without a valid refresh → manual reconnection
         raise ValueError(
             f"Token expired and refresh failed. "
             f"Please reconnect via OAuth: "
