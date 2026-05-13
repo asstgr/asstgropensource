@@ -4,6 +4,26 @@
 
 ---
 
+## ☁️ Hosted Version Available
+
+**Don't want to self-host?** [**asstgr.com**](https://www.asstgr.com/home/) is the fully managed SaaS version of this project — no setup, no infrastructure.
+
+The SaaS version includes everything in this open-source release, plus a significantly more advanced dashboard:
+
+- **Visual API builder** — create and configure APIs, endpoints, parameters, headers, and methods through a polished UI without touching the API directly
+- **Live execution interface** — run endpoint calls directly from the dashboard with a chat-style history, formatted response display, and one-click JSON download
+- **OAuth2 flow management** — authorize, refresh tokens, and monitor token status visually per API
+- **Real-time quota tracking** — progress bar and usage breakdown updated after every call
+- **API key management UI** — generate, name, copy, and revoke `sk-...` keys from the browser
+- **Request analytics** — bar chart of calls per API over the last 30 days
+- **Audit logs** — per-user call history with status codes and response metadata
+
+> The open-source version gives you the full backend, REST API, and admin panel. The SaaS version wraps it in a production-ready interface built for day-to-day use.
+
+👉 [Try the hosted version at asstgr.com](https://www.asstgr.com/home/) · [Star the open-source repo](https://github.com/botyut/asstgr)
+
+---
+
 ## What is Asstgr?
 
 **Asstgr** is an **outbound API gateway**: instead of integrating third-party APIs directly into your apps, you register them once in Asstgr, describe their endpoints and parameters, and call them through a single, secured interface.
@@ -86,7 +106,7 @@ asstgrv7/
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/your-username/asstgr.git
+git clone https://github.com/botyut/asstgr.git
 cd asstgr
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
@@ -349,3 +369,6 @@ MIT — feel free to use, modify, and distribute.
 ## Author
 
 Built with Django + DRF. Contributions welcome.
+
+- 🌐 Hosted version: [asstgr.com](https://www.asstgr.com/home/)
+- 💻 Open-source: [github.com/botyut/asstgr](https://github.com/botyut/asstgr)
