@@ -5,13 +5,13 @@ app_name = "api_public"
 
 urlpatterns = [
 
-    # ── Clés API ──────────────────────────────────────────────
+    # ── API keys ──────────────────────────────────────────────
     path("keys/",
          views.APIKeyListCreateView.as_view(), name="key-list-create"),
     path("keys/<int:pk>/",
          views.APIKeyRevokeView.as_view(), name="key-revoke"),
 
-    # ── Quota & Limites ───────────────────────────────────────
+    # ── Quota & Limits ───────────────────────────────────────
     path("quota/",
          views.QuotaStatusView.as_view(), name="quota-status"),
     path("limits/",
@@ -29,7 +29,7 @@ urlpatterns = [
     path("apis/<int:api_id>/endpoints/<int:endpoint_id>/",
          views.EndpointDetailView.as_view(), name="endpoint-detail"),
 
-    # ── Paramètres ────────────────────────────────────────────
+    # ── parameters ────────────────────────────────────────────
     path("apis/<int:api_id>/endpoints/<int:endpoint_id>/parameters/",
          views.ParameterListCreateView.as_view(), name="parameter-list-create"),
     path("apis/<int:api_id>/endpoints/<int:endpoint_id>/parameters/<int:param_id>/",
@@ -41,13 +41,13 @@ urlpatterns = [
     path("apis/<int:api_id>/endpoints/<int:endpoint_id>/headers/<int:header_id>/",
          views.HeaderDetailView.as_view(), name="header-detail"),
 
-    # ── Méthodes ──────────────────────────────────────────────
+    # ── MMethods ──────────────────────────────────────────────
     path("apis/<int:api_id>/endpoints/<int:endpoint_id>/methods/",
          views.MethodListCreateView.as_view(), name="method-list-create"),
     path("apis/<int:api_id>/endpoints/<int:endpoint_id>/methods/<int:method_id>/",
          views.MethodDetailView.as_view(), name="method-detail"),
 
-    # ── Exécution ─────────────────────────────────────────────
+    # ── execution ─────────────────────────────────────────────
     path("apis/<int:api_id>/endpoints/<int:endpoint_id>/execute/",
          views.ExecuteEndpointView.as_view(), name="endpoint-execute"),
 

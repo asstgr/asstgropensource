@@ -5,12 +5,12 @@ from api_management.models import APICallQuota
 
 class IsAPIKeyAuthenticated(BasePermission):
     """
-    Autorise uniquement les requêtes authentifiées via une API Key valide.
+    Allows only requests authenticated via a valid API Key.
     """
     message = "A valid API key is required. Use: Authorization: Api-Key sk-..."
 
     def has_permission(self, request, view):
-        # request.auth est l'objet PublicAPIKey si l'auth a réussi
+        # request.auth is the PublicAPIKey object if authentication is successful
         return (
             request.user is not None
             and request.user.is_authenticated
@@ -20,19 +20,19 @@ class IsAPIKeyAuthenticated(BasePermission):
 
 class HasSufficientQuota(BasePermission):
     """
-    Vérifie que l'utilisateur dispose du quota mensuel nécessaire.
-    Doit être utilisé APRÈS IsAPIKeyAuthenticated.
+    Checks that the user has the necessary monthly quota.
+    Must be used AFTER IsAPIKeyAuthenticated.
 
-    Usage dans la vue :
+    Usage in the view :
         permission_classes = [IsAPIKeyAuthenticated, HasSufficientQuota]
 
-    La vue doit définir `self.get_api_quota_cost()` ou laisser le défaut à 1.
+    The view must define `self.get_api_quota_cost()` or leave the default as 1.
     """
     message = "Monthly quota exceeded."
 
     def has_permission(self, request, view):
         if request.method in ("GET", "HEAD", "OPTIONS"):
-            # Les lectures ne consomment pas de quota
+            # Reads do not consume quota
             return True
 
         cost = getattr(view, "quota_cost", 1)
@@ -47,6 +47,6 @@ class HasSufficientQuota(BasePermission):
                 )
             )
 
-        # Attache le quota à la requête pour l'incrémenter après succès
+        # Attach the quota to the request for incrementing after success
         request._quota = quota
         return True

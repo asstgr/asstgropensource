@@ -11,14 +11,14 @@ User = get_user_model()
 
 
 def generate_api_key():
-    """Génère une clé API unique au format 'sk-xxxxxxxxxxxxxxxxxxxx'"""
+    """Generates a unique API key in the format 'sk-xxxxxxxxxxxxxxxxxxxx'"""
     return f"sk-{uuid.uuid4().hex}{uuid.uuid4().hex[:8]}"
 
 
 class PublicAPIKey(models.Model):
     """
-    Clé API publique pour accéder à la REST API du SaaS.
-    Chaque utilisateur peut en avoir plusieurs (ex: dev, prod).
+    Public API key for accessing the SaaS REST API.
+    Each user can have multiple keys (e.g., dev, prod).
     """
     user = models.ForeignKey(
         User,
@@ -33,7 +33,7 @@ class PublicAPIKey(models.Model):
     )
     name = models.CharField(
         max_length=100,
-        help_text="Nom de la clé (ex: 'Production', 'Dev local')"
+        help_text="Key name (e.g. 'Production', 'Local Dev')"
     )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -41,7 +41,7 @@ class PublicAPIKey(models.Model):
     expires_at = models.DateTimeField(
         null=True,
         blank=True,
-        help_text="Laisser vide pour une clé sans expiration"
+        help_text="Leave blank for a key without expiration"
     )
 
     class Meta:
@@ -63,7 +63,7 @@ class PublicAPIKey(models.Model):
         return self.is_active and not self.is_expired
 
     def mark_used(self):
-        """Met à jour last_used_at sans déclencher auto_now sur d'autres champs"""
+        """Updates last_used_at without triggering auto_now on other fields"""
         self.last_used_at = timezone.now()
         self.save(update_fields=["last_used_at"])
 

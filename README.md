@@ -4,6 +4,14 @@
 
 ---
 
+## ⭐ Like this project?
+
+If Asstgr saved you time or gave you ideas, a GitHub star goes a long way — it helps other developers discover the project and keeps me motivated to build more.
+
+**[⭐ Star it on GitHub](https://github.com/botyut/asstgr)** — it takes 2 seconds and means a lot. Thank you!
+
+---
+
 ## ☁️ Hosted Version Available
 
 **Don't want to self-host?** [**asstgr.com**](https://www.asstgr.com/home/) is the fully managed SaaS version of this project — no setup, no infrastructure.
@@ -372,3 +380,4 @@ Built with Django + DRF. Contributions welcome.
 
 - 🌐 Hosted version: [asstgr.com](https://www.asstgr.com/home/)
 - 💻 Open-source: [github.com/botyut/asstgr](https://github.com/botyut/asstgr)
+- ⭐ If this project helped you, [leave a star](https://github.com/botyut/asstgr) — it's the best way to support the work!

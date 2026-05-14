@@ -26,7 +26,7 @@ from .limits import check_limit, get_limits_summary, LIMITS
 
 
 # ──────────────────────────────────────────────────────────────
-# 🔑 Clés API
+# 🔑 API Keys
 # ──────────────────────────────────────────────────────────────
 
 class APIKeyListCreateView(APIView):
@@ -62,11 +62,11 @@ class APIKeyRevokeView(APIView):
 
 
 # ──────────────────────────────────────────────────────────────
-# 📋 Limites
+# 📋 Limits
 # ──────────────────────────────────────────────────────────────
 
 class LimitsView(APIView):
-    """GET /api/v1/limits/ — limites en vigueur + usage actuel."""
+    """GET /api/v1/limits/ — active limits + current usage."""
     authentication_classes = [APIKeyAuthentication]
     permission_classes = [IsAPIKeyAuthenticated]
 
@@ -88,8 +88,8 @@ class LimitsView(APIView):
 
 class UserAPIListCreateView(APIView):
     """
-    GET  /api/v1/apis/  → liste les APIs de l'utilisateur
-    POST /api/v1/apis/  → crée une nouvelle API (limité à LIMITS["apis"])
+    GET  /api/v1/apis/  → list the user's APIs
+    POST /api/v1/apis/  → create a new API (limited to LIMITS["apis"])
     """
     authentication_classes = [APIKeyAuthentication]
     permission_classes = [IsAPIKeyAuthenticated]
@@ -155,7 +155,7 @@ class UserAPIDetailView(APIView):
 class EndpointListCreateView(APIView):
     """
     GET  /api/v1/apis/<id>/endpoints/
-    POST /api/v1/apis/<id>/endpoints/  (limité à LIMITS["endpoints"])
+    POST /api/v1/apis/<id>/endpoints/  (limited to LIMITS["endpoints"])
     """
     authentication_classes = [APIKeyAuthentication]
     permission_classes = [IsAPIKeyAuthenticated]
@@ -210,13 +210,13 @@ class EndpointDetailView(APIView):
 
 
 # ──────────────────────────────────────────────────────────────
-# ⚙️ Paramètres — CRUD
+# ⚙️ Parameters — CRUD
 # ──────────────────────────────────────────────────────────────
 
 class ParameterListCreateView(APIView):
     """
     GET  /api/v1/apis/<id>/endpoints/<ep_id>/parameters/
-    POST /api/v1/apis/<id>/endpoints/<ep_id>/parameters/  (limité à LIMITS["parameters"])
+    POST /api/v1/apis/<id>/endpoints/<ep_id>/parameters/  (limited to LIMITS["parameters"])
     """
     authentication_classes = [APIKeyAuthentication]
     permission_classes = [IsAPIKeyAuthenticated]
@@ -285,7 +285,7 @@ class ParameterDetailView(APIView):
 class HeaderListCreateView(APIView):
     """
     GET  /api/v1/apis/<id>/endpoints/<ep_id>/headers/
-    POST /api/v1/apis/<id>/endpoints/<ep_id>/headers/  (limité à LIMITS["headers"])
+    POST /api/v1/apis/<id>/endpoints/<ep_id>/headers/  (limited to LIMITS["headers"])
     """
     authentication_classes = [APIKeyAuthentication]
     permission_classes = [IsAPIKeyAuthenticated]
@@ -342,7 +342,7 @@ class HeaderDetailView(APIView):
 
 
 # ──────────────────────────────────────────────────────────────
-# ⚡ Méthodes — CRUD
+# ⚡ Methods — CRUD
 # ──────────────────────────────────────────────────────────────
 
 class MethodListCreateView(APIView):
@@ -390,7 +390,7 @@ class MethodDetailView(APIView):
 
 
 # ──────────────────────────────────────────────────────────────
-# 🚀 Exécution d'un endpoint
+# 🚀 Endpoint execution
 # ──────────────────────────────────────────────────────────────
 
 class ExecuteEndpointView(APIView):
@@ -488,17 +488,16 @@ class QuotaStatusView(APIView):
         })
 
 
-
 # ──────────────────────────────────────────────────────────────
-# 0Auth 2.0
+# OAuth 2.0
 # ──────────────────────────────────────────────────────────────
 
 class OAuthConfigView(APIView):
     """
-    GET    /api/v1/apis/<api_id>/oauth/   → récupère la config OAuth
-    POST   /api/v1/apis/<api_id>/oauth/   → crée la config OAuth
-    PATCH  /api/v1/apis/<api_id>/oauth/   → met à jour la config OAuth
-    DELETE /api/v1/apis/<api_id>/oauth/   → supprime la config OAuth
+    GET    /api/v1/apis/<api_id>/oauth/   → retrieve the OAuth config
+    POST   /api/v1/apis/<api_id>/oauth/   → create the OAuth config
+    PATCH  /api/v1/apis/<api_id>/oauth/   → update the OAuth config
+    DELETE /api/v1/apis/<api_id>/oauth/   → delete the OAuth config
     """
     authentication_classes = [APIKeyAuthentication]
     permission_classes = [IsAPIKeyAuthenticated]
@@ -549,7 +548,7 @@ class OAuthConfigView(APIView):
 
 class OAuthTokenStatusView(APIView):
     """
-    GET  /api/v1/apis/<api_id>/oauth/token/  → statut du token
+    GET  /api/v1/apis/<api_id>/oauth/token/  → token status
     POST /api/v1/apis/<api_id>/oauth/token/  → force refresh (client_credentials only)
     """
     authentication_classes = [APIKeyAuthentication]
@@ -567,7 +566,7 @@ class OAuthTokenStatusView(APIView):
             'is_token_valid': oauth.is_token_valid(),
             'token_expires_at': oauth.token_expires_at,
             'has_refresh_token': bool(oauth.refresh_token),
-            # Authorization Code : fournit le lien de connexion
+            # Authorization Code: provide the login link
             'authorize_url': (
                 f'/api/oauth/authorize/{api_id}/'
                 if oauth.grant_type == 'authorization_code'
@@ -576,7 +575,7 @@ class OAuthTokenStatusView(APIView):
         })
 
     def post(self, request, api_id):
-        """Force refresh — uniquement pour client_credentials."""
+        """Force refresh — only available for client_credentials."""
         oauth = self._get_oauth(request, api_id)
 
         if oauth.grant_type != 'client_credentials':
