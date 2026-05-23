@@ -34,7 +34,7 @@ The SaaS version includes everything in this open-source release, plus a signifi
 
 ## What is Asstgr?
 
-**Asstgr** is an **outbound API gateway**: instead of integrating third-party APIs directly into your apps, you register them once in Asstgr, describe their endpoints and parameters, and call them through a single, secured interface.
+**Asstgr** is an **API Abstraction Layer**: instead of integrating third-party APIs directly into your apps, you register them once in Asstgr, describe their endpoints and parameters, and call them through a single, secured interface.
 
 Think of it as your own private [RapidAPI](https://rapidapi.com/) — self-hosted, fully programmable via REST, with fine-grained quota control.
 
