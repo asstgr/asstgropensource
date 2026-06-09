@@ -1,4 +1,28 @@
 # Asstgr — Outbound API Gateway
+## 📢 Repository Migration Notice
+
+**Asstgr has moved to a new official GitHub repository.**
+
+All future development, bug fixes, new features, and releases will be published in:
+
+**https://github.com/asstgr/asstgropensource**
+
+If you previously cloned the project, update your remote:
+
+```bash
+git remote set-url origin https://github.com/asstgr/asstgropensource.git
+```
+
+Or clone the new repository directly:
+
+```bash
+git clone https://github.com/asstgr/asstgropensource.git
+```
+
+⚠️ This repository is now maintained in legacy mode and may not receive future updates.
+
+Please update your bookmarks and consider starring the new repository to stay informed about upcoming releases.
+
 
 > A self-hosted Django platform to manage, proxy, and rate-limit calls to third-party APIs — with OAuth 2.0 support, per-user quota, and a unified REST interface.
 
