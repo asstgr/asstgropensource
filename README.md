@@ -8,7 +8,7 @@
 
 If Asstgr saved you time or gave you ideas, a GitHub star goes a long way — it helps other developers discover the project and keeps me motivated to build more.
 
-**[⭐ Star it on GitHub](https://github.com/botyut/asstgr)** — it takes 2 seconds and means a lot. Thank you!
+**[⭐ Star it on GitHub](https://github.com/asstgr/asstgropensource)** — it takes 2 seconds and means a lot. Thank you!
 
 ---
 
@@ -28,7 +28,7 @@ The SaaS version includes everything in this open-source release, plus a signifi
 
 > The open-source version gives you the full backend, REST API, and admin panel. The SaaS version wraps it in a production-ready interface built for day-to-day use.
 
-👉 [Try the hosted version at asstgr.com](https://www.asstgr.com/home/) · [Star the open-source repo](https://github.com/botyut/asstgr)
+👉 [Try the hosted version at asstgr.com](https://www.asstgr.com/home/) · [Star the open-source repo](https://github.com/asstgr/asstgropensource)
 
 ---
 
@@ -56,7 +56,7 @@ Your app  ──►  Asstgr (/api/v1/...execute/)  ──►  Stripe / OpenWeath
 - **Unified execution** — Call any registered endpoint via `/api/v1/.../execute/` with parameters
 - **OAuth 2.0** — Full support for `client_credentials`, `authorization_code`, and `password` flows, with automatic token refresh
 - **API Key auth** — Generate and revoke personal API keys (`sk-...`) to authenticate against Asstgr
-- **Quota system** — Per-user monthly credit budget; each API can have a configurable `quota_cost`
+- **Quota system** — Per-user monthly credit budget; each API has a configurable `quota_cost`
 - **Rate limiting** — Burst (30/s) and sustained (1000/day) throttling per API key
 - **Response formatting** — JSON, compact, standard, or verbose (human-readable) output modes
 - **Full audit logs** — Every call is logged with user, endpoint, status code, and response size
@@ -109,13 +109,82 @@ asstgrv7/
 
 ---
 
+## Data Model
+
+Asstgr's database is organized around a hierarchy of objects. Here's a quick overview of the core models and their key fields:
+
+### `API`
+The top-level object representing a third-party API.
+
+| Field | Type | Description |
+|---|---|---|
+| `name` | string | Display name |
+| `url` | URL | Base URL of the third-party API |
+| `auth_required` | bool | Whether authentication is needed |
+| `quota_cost` | int | Credits consumed per call (default: 1) |
+| `is_active` / `is_blocked` | bool | Availability flags |
+
+### `Endpoint`
+A path under an API (e.g. `/weather`).
+
+| Field | Type | Description |
+|---|---|---|
+| `path` | string | Path appended to the API base URL |
+| `description` | string | What the endpoint does |
+| `example_request` / `example_response` | text | Optional documentation |
+
+### `Parameter`
+A parameter attached to an endpoint.
+
+| Field | Type | Description |
+|---|---|---|
+| `name` | string | Parameter name |
+| `param_type` | enum | `query`, `path`, or `body` |
+| `data_type` | enum | `STRING`, `INTEGER`, `BOOLEAN`, `DATE`, `JSON` |
+| `required` | bool | Whether the parameter is mandatory |
+| `default_value` | string | Optional fallback value |
+| `stored_value` | string | Pre-filled value (for non-editable params) |
+| `editable` | bool | Whether the caller can override the value |
+
+### `Header`
+A fixed HTTP header sent with every call to an endpoint (e.g. `Content-Type`, `X-Api-Version`).
+
+### `Method`
+The HTTP method(s) allowed on an endpoint (`GET`, `POST`, `PUT`, `DELETE`).
+
+### `OAuthConfig`
+OAuth 2.0 configuration attached to an API (one per API).
+
+| Field | Description |
+|---|---|
+| `grant_type` | `client_credentials`, `authorization_code`, or `password` |
+| `token_url` | Token endpoint URL |
+| `client_id` / `client_secret_encrypted` | OAuth credentials |
+| `scope` | Space-separated scopes |
+| `access_token` / `refresh_token` | Cached token values |
+| `token_expires_at` | Expiry datetime (`null` = permanent token) |
+
+### `APICallQuota`
+Per-user monthly credit tracking.
+
+| Field | Description |
+|---|---|
+| `monthly_limit` | Credit budget (`null` = unlimited) |
+| `call_count` | Credits consumed so far this month |
+| `month` / `year` | Billing period |
+
+### `APILog`
+Audit record created after every executed call — stores the user, endpoint, HTTP method, request/response data, status code, and response size.
+
+---
+
 ## Quick Start
 
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/botyut/asstgr.git
-cd asstgr
+git clone https://github.com/asstgr/asstgropensource.git
+cd asstgropensource
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -379,5 +448,6 @@ MIT — feel free to use, modify, and distribute.
 Built with Django + DRF. Contributions welcome.
 
 - 🌐 Hosted version: [asstgr.com](https://www.asstgr.com/home/)
-- 💻 Open-source: [github.com/botyut/asstgr](https://github.com/botyut/asstgr)
-- ⭐ If this project helped you, [leave a star](https://github.com/botyut/asstgr) — it's the best way to support the work!
+- 💻 Open-source: [github.com/asstgr/asstgropensource](https://github.com/asstgr/asstgropensource)
+- 🐦 Follow on X: [@asstgrplace](https://x.com/asstgrplace)
+- ⭐ If this project helped you, [leave a star](https://github.com/asstgr/asstgropensource) — it's the best way to support the work!
