@@ -449,5 +449,5 @@ Built with Django + DRF. Contributions welcome.
 
 - 🌐 Hosted version: [asstgr.com](https://www.asstgr.com/home/)
 - 💻 Open-source: [github.com/asstgr/asstgropensource](https://github.com/asstgr/asstgropensource)
-- 🐦 Follow on X: [@asstgrplace](https://x.com/asstgrplace)
+- 🐦 Follow on X: [@asstgrplace](https://x.com/asstgrio)
 - ⭐ If this project helped you, [leave a star](https://github.com/asstgr/asstgropensource) — it's the best way to support the work!
