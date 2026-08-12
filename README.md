@@ -4,31 +4,18 @@
 
 ---
 
+## Author
+
+Built with Django + DRF. Contributions welcome.
+
+-  Follow on X: [@asstgrio](https://x.com/asstgrio)
+---
+
 ## ⭐ Like this project?
 
 If Asstgr saved you time or gave you ideas, a GitHub star goes a long way — it helps other developers discover the project and keeps me motivated to build more.
 
 **[⭐ Star it on GitHub](https://github.com/asstgr/asstgropensource)** — it takes 2 seconds and means a lot. Thank you!
-
----
-
-## ☁️ Hosted Version Available
-
-**Don't want to self-host?** [**asstgr.com**](https://www.asstgr.com/home/) is the fully managed SaaS version of this project — no setup, no infrastructure.
-
-The SaaS version includes everything in this open-source release, plus a significantly more advanced dashboard:
-
-- **Visual API builder** — create and configure APIs, endpoints, parameters, headers, and methods through a polished UI without touching the API directly
-- **Live execution interface** — run endpoint calls directly from the dashboard with a chat-style history, formatted response display, and one-click JSON download
-- **OAuth2 flow management** — authorize, refresh tokens, and monitor token status visually per API
-- **Real-time quota tracking** — progress bar and usage breakdown updated after every call
-- **API key management UI** — generate, name, copy, and revoke `sk-...` keys from the browser
-- **Request analytics** — bar chart of calls per API over the last 30 days
-- **Audit logs** — per-user call history with status codes and response metadata
-
-> The open-source version gives you the full backend, REST API, and admin panel. The SaaS version wraps it in a production-ready interface built for day-to-day use.
-
-👉 [Try the hosted version at asstgr.com](https://www.asstgr.com/home/) · [Star the open-source repo](https://github.com/asstgr/asstgropensource)
 
 ---
 
@@ -440,14 +427,3 @@ The `JSONCleaner` engine transforms raw API responses into readable output:
 ## License
 
 MIT — feel free to use, modify, and distribute.
-
----
-
-## Author
-
-Built with Django + DRF. Contributions welcome.
-
-- 🌐 Hosted version: [asstgr.com](https://www.asstgr.com/home/)
-- 💻 Open-source: [github.com/asstgr/asstgropensource](https://github.com/asstgr/asstgropensource)
-- 🐦 Follow on X: [@asstgrio](https://x.com/asstgrio)
-- ⭐ If this project helped you, [leave a star](https://github.com/asstgr/asstgropensource) — it's the best way to support the work!
