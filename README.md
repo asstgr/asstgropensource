@@ -4,6 +4,28 @@
 
 ---
 
+
+## 🌐 SaaS Version Available
+
+Don't want to deploy and maintain the infrastructure yourself? A **fully managed SaaS version** of Asstgr is available at:
+
+**👉 [https://www.asstgr.com/home/](https://www.asstgr.com/home/)**
+
+It offers a complete management interface:
+- **Dashboard** with an overview of your APIs, endpoints, headers, parameters, and methods
+- **API key management** (creation, revocation, automatic masking)
+- **Monthly quota tracking** with progress bar and visual alerts
+- **Usage statistics** (requests-per-API chart over the last 30 days)
+- **Account management**: paginated call logs, filtering by date range, targeted deletion
+- **Per-API OAuth2 configuration** (client credentials, authorization code, password grant)
+- **Dark / light mode** with automatic system preference detection
+
+No need to install PostgreSQL, run Django migrations, or configure a `.env` file — just create an account and start registering your APIs.
+
+> The self-hosted version (this repository) remains available for users who want full control over their infrastructure and data.
+
+---
+
 ## Author
 
 Built with Django + DRF. Contributions welcome.
