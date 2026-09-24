@@ -11,39 +11,27 @@ Don't want to deploy and maintain the infrastructure yourself? A **fully managed
 
 **👉 [https://www.asstgr.com/home/](https://www.asstgr.com/home/)**
 
-It offers a complete management interface:
-- **Dashboard** with an overview of your APIs, endpoints, headers, parameters, and methods
-- **API key management** (creation, revocation, automatic masking)
-- **Monthly quota tracking** with progress bar and visual alerts
-- **Usage statistics** (requests-per-API chart over the last 30 days)
-- **Account management**: paginated call logs, filtering by date range, targeted deletion
-- **Per-API OAuth2 configuration** (client credentials, authorization code, password grant)
-- **Dark / light mode** with automatic system preference detection
-
-No need to install PostgreSQL, run Django migrations, or configure a `.env` file — just create an account and start registering your APIs.
 
 > The self-hosted version (this repository) remains available for users who want full control over their infrastructure and data.
 
 ---
 
-## Author
+## Social media
 
-Built with Django + DRF. Contributions welcome.
 
 -  Follow on X: [@asstgrio](https://x.com/asstgrio)
----
 
-## ⭐ Like this project?
+-  Follow on facebook : [@asstgrplace](https://www.facebook.com/share/1DfmcJae6K/)
 
-If Asstgr saved you time or gave you ideas, a GitHub star goes a long way — it helps other developers discover the project and keeps me motivated to build more.
+-  Follow on Youtube : [@asstgrio](https://youtube.com/@asstgrio?si=L-oI3ZAXir_f-jfY)
 
-**[⭐ Star it on GitHub](https://github.com/asstgr/asstgropensource)** — it takes 2 seconds and means a lot. Thank you!
+
 
 ---
 
 ## What is Asstgr?
 
-**Asstgr** is an **API Abstraction Layer**: instead of integrating third-party APIs directly into your apps, you register them once in Asstgr, describe their endpoints and parameters, and call them through a single, secured interface.
+**Asstgr** is an **Outbound API Gateway**: instead of integrating third-party APIs directly into your apps, you register them once in Asstgr, describe their endpoints and parameters, and call them through a single, secured interface.
 
 Think of it as your own private [RapidAPI](https://rapidapi.com/) — self-hosted, fully programmable via REST, with fine-grained quota control.
 
@@ -187,22 +175,59 @@ Audit record created after every executed call — stores the user, endpoint, HT
 
 ---
 
-## Quick Start
+## 🚀 Getting Started
 
-### 1. Clone & install
+### Option A — Docker (recommended, 1 line)
 
-```bash
+The fastest way to get Asstgr running, no local PostgreSQL/Python setup required.
+
+\`\`\`bash
+cp .env.example .env && docker compose up --build
+\`\`\`
+
+This command:
+1. Creates a `.env` file from the provided example (edit it if needed, especially `DJANGO_SECRET_KEY`)
+2. Starts PostgreSQL
+3. Builds the Django image and waits for the database to be ready
+4. Automatically applies migrations
+5. Automatically creates a superuser if `DJANGO_SUPERUSER_*` is set in `.env`
+6. Starts the server at `http://localhost:8000/api/v1/`
+
+Run in the background:
+\`\`\`bash
+docker compose up --build -d
+\`\`\`
+
+Stop:
+\`\`\`bash
+docker compose down
+\`\`\`
+
+Reset everything (including the database):
+\`\`\`bash
+docker compose down -v
+\`\`\`
+
+---
+
+### Option B — Manual install (for local development / contributing)
+
+**Prerequisites:** Python 3.12+, PostgreSQL running locally[, Redis running locally].
+
+#### 1. Clone & install
+
+\`\`\`bash
 git clone https://github.com/asstgr/asstgropensource.git
 cd asstgropensource
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-```
+\`\`\`
 
-### 2. Configure environment
+#### 2. Configure environment
 
 Create a `.env` file at the project root:
 
-```env
+\`\`\`env
 DJANGO_SECRET_KEY=your-secret-key
 
 DB_NAME_local=asstgr_db
@@ -210,24 +235,24 @@ DB_USER_local=postgres
 DB_PASSWORD_local=your-password
 DB_HOST_local=localhost
 DB_PORT_local=5432
-```
+\`\`\`
 
-### 3. Run migrations & create superuser
+#### 3. Run migrations & create superuser
 
-```bash
+\`\`\`bash
 python manage.py migrate --settings=asstgrv7.settings.dev
 python manage.py createsuperuser --settings=asstgrv7.settings.dev
-```
+\`\`\`
 
-### 4. Start the server
+#### 4. Start the server
 
-```bash
+\`\`\`bash
 python manage.py runserver --settings=asstgrv7.settings.dev
-```
+\`\`\`
 
 The API is available at `http://localhost:8000/api/v1/`.
 
----
+
 
 ## API Usage
 
