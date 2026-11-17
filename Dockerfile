@@ -1,26 +1,26 @@
 FROM python:3.12-slim
 
-# Empêche Python de bufferiser stdout/stderr (logs visibles en temps réel)
+# Prevents Python from buffering stdout/stderr (logs visible in real time)
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Dépendances système nécessaires à psycopg2 / builds Python
+# System dependencies required for psycopg2 / Python builds
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
-# Installation des dépendances Python (mise en cache si requirements.txt ne change pas)
+# Installing Python dependencies (caching if requirements.txt doesn’t change)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copie du code source
+# Copy the source code
 COPY . .
 
-# Rend le script d'entrée exécutable
+# Make the entrypoint script executable
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 

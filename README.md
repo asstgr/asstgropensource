@@ -21,7 +21,7 @@ Don't want to deploy and maintain the infrastructure yourself? A **fully managed
 
 -  Follow on X: [@asstgrio](https://x.com/asstgrio)
 
--  Follow on facebook : [@asstgrplace](https://www.facebook.com/share/1DfmcJae6K/)
+-  Follow on LinkedIn: [Asstgr](https://www.linkedin.com/company/asstgr/home/)
 
 -  Follow on Youtube : [@asstgrio](https://youtube.com/@asstgrio?si=L-oI3ZAXir_f-jfY)
 
@@ -51,7 +51,7 @@ Your app  ──►  Asstgr (/api/v1/...execute/)  ──►  Stripe / OpenWeath
 - **API Registry** — Register any third-party API with its base URL, authentication, and endpoints
 - **Endpoint modeling** — Describe paths, parameters (query / path / body), HTTP headers, and methods
 - **Unified execution** — Call any registered endpoint via `/api/v1/.../execute/` with parameters
-- **OAuth 2.0** — Full support for `client_credentials`, `authorization_code`, and `password` flows, with automatic token refresh
+- **OAuth 2.0 (🧪 experimental)** — Support for `client_credentials`, `authorization_code`, and `password` flows, with automatic token refresh. See the [note below](#-oauth-20-is-experimental)
 - **API Key auth** — Generate and revoke personal API keys (`sk-...`) to authenticate against Asstgr
 - **Quota system** — Per-user monthly credit budget; each API has a configurable `quota_cost`
 - **Rate limiting** — Burst (30/s) and sustained (1000/day) throttling per API key
@@ -61,12 +61,20 @@ Your app  ──►  Asstgr (/api/v1/...execute/)  ──►  Stripe / OpenWeath
 
 ---
 
+## 🧪 OAuth 2.0 is experimental
+
+> **Heads-up:** the OAuth 2.0 part of Asstgr (flows, token storage, automatic refresh, authorize/callback views) is **experimental**. It works for the use cases we have tested so far, but it has not been validated against a wide range of providers, and its behavior or API may change.
+>
+> **Any testing, feedback, bug report or improvement proposal is more than welcome!** Please open an issue or a pull request on the repository, and tell us which provider and grant type you tested (`client_credentials`, `authorization_code`, `password`).
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
 | Backend | Django 5.x + Django REST Framework |
-| Auth | Custom API Key + SimpleJWT + OAuth 2.0 |
+| Auth | Custom API Key + SimpleJWT + OAuth 2.0 (experimental) |
 | Database | PostgreSQL |
 | Async | Daphne / Django Channels (ASGI) |
 | Throttling | DRF SimpleRateThrottle |
@@ -85,8 +93,8 @@ asstgrv7/
 ├── api_management/         # Core: API registry, models, OAuth service
 │   ├── models.py           # API, Endpoint, Parameter, Header, Method, APILog, APICallQuota
 │   ├── utils.py            # Request building, response formatting (JSONCleaner)
-│   ├── oauth_service.py    # OAuthService: fetch, refresh, save tokens
-│   ├── views_oauth.py      # OAuth authorize / callback views
+│   ├── oauth_service.py    # OAuthService: fetch, refresh, save tokens (experimental)
+│   ├── views_oauth.py      # OAuth authorize / callback views (experimental)
 │   └── admin.py
 │
 ├── api_public/             # Public REST API (v1)
@@ -149,7 +157,7 @@ A fixed HTTP header sent with every call to an endpoint (e.g. `Content-Type`, `X
 ### `Method`
 The HTTP method(s) allowed on an endpoint (`GET`, `POST`, `PUT`, `DELETE`).
 
-### `OAuthConfig`
+### `OAuthConfig` (🧪 experimental)
 OAuth 2.0 configuration attached to an API (one per API).
 
 | Field | Description |
@@ -181,9 +189,9 @@ Audit record created after every executed call — stores the user, endpoint, HT
 
 The fastest way to get Asstgr running, no local PostgreSQL/Python setup required.
 
-\`\`\`bash
+```bash
 cp .env.example .env && docker compose up --build
-\`\`\`
+```
 
 This command:
 1. Creates a `.env` file from the provided example (edit it if needed, especially `DJANGO_SECRET_KEY`)
@@ -194,19 +202,19 @@ This command:
 6. Starts the server at `http://localhost:8000/api/v1/`
 
 Run in the background:
-\`\`\`bash
+```bash
 docker compose up --build -d
-\`\`\`
+```
 
 Stop:
-\`\`\`bash
+```bash
 docker compose down
-\`\`\`
+```
 
 Reset everything (including the database):
-\`\`\`bash
+```bash
 docker compose down -v
-\`\`\`
+```
 
 ---
 
@@ -216,18 +224,18 @@ docker compose down -v
 
 #### 1. Clone & install
 
-\`\`\`bash
+```bash
 git clone https://github.com/asstgr/asstgropensource.git
 cd asstgropensource
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-\`\`\`
+```
 
 #### 2. Configure environment
 
 Create a `.env` file at the project root:
 
-\`\`\`env
+```env
 DJANGO_SECRET_KEY=your-secret-key
 
 DB_NAME_local=asstgr_db
@@ -235,20 +243,20 @@ DB_USER_local=postgres
 DB_PASSWORD_local=your-password
 DB_HOST_local=localhost
 DB_PORT_local=5432
-\`\`\`
+```
 
 #### 3. Run migrations & create superuser
 
-\`\`\`bash
+```bash
 python manage.py migrate --settings=asstgrv7.settings.dev
 python manage.py createsuperuser --settings=asstgrv7.settings.dev
-\`\`\`
+```
 
 #### 4. Start the server
 
-\`\`\`bash
+```bash
 python manage.py runserver --settings=asstgrv7.settings.dev
-\`\`\`
+```
 
 The API is available at `http://localhost:8000/api/v1/`.
 
@@ -396,7 +404,9 @@ All follow the same nested pattern under `/api/v1/apis/{api_id}/endpoints/...` �
 
 `display_format` options: `json` · `compact` · `standard` · `verbose`
 
-### OAuth 2.0
+### OAuth 2.0 (🧪 experimental)
+
+> ⚠️ **Experimental feature.** This part is still under active development and has been tested on a limited number of providers. Tests, feedback and improvement proposals are very welcome — feel free to open an issue or a pull request.
 
 | Method | URL | Description |
 |---|---|---|
@@ -468,6 +478,12 @@ The `JSONCleaner` engine transforms raw API responses into readable output:
 | `DB_PASSWORD_local` | PostgreSQL password |
 | `DB_HOST_local` | PostgreSQL host |
 | `DB_PORT_local` | PostgreSQL port |
+
+---
+
+## Contributing
+
+Contributions are welcome! This is especially true for the **OAuth 2.0 module (experimental)**: provider compatibility tests, bug reports, security reviews and improvement proposals are all appreciated.
 
 ---
 
